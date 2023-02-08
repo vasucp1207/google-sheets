@@ -1,17 +1,15 @@
 <script setup>
 import Cell from "./components/Cell.vue";
-import Number from "./components/Number.vue";
-import Top from "./components/Top.vue";
 </script>
 
 <template>
   <div class="wrap">
-    <Number />
     <div>
-      <Top />
       <div class="cells-cont">
-        <div v-for="i in 100" class="cell">
-          <Cell :idx="i" />
+        <div v-for="i in 27" class="cell">
+          <div v-for="j in 50" class="cell">
+            <Cell :col="i" :row="j" />
+          </div>
         </div>
       </div>
     </div>
@@ -27,20 +25,44 @@ body {
 
 .cells-cont {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(27, 1fr);
   grid-template-rows: auto;
 }
 
 .cell {
-  height: 35px;
+  height: 30px;
+  border: 1px solid black;
+  border-top: none;
+  border-left: none;
+  width: fit-content;
 }
 .inp {
-  border-color: #cbcccb;
+  border: none;
   font-size: 17px;
-  border-left: none;
-  border-top: none;
   border-radius: 0;
-  height: 31px;
+  height: 28px;
+  width: 116px;
+}
+.empty {
+  height: 30px;
+  width: 30px;
+}
+.top {
+  border: none;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #cbcccb;
+  width: 120px;
+}
+.left {
+  height: 30px;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #cbcccb;
 }
 
 .wrap {
