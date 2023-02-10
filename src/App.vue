@@ -4,12 +4,10 @@ import Cell from "./components/Cell.vue";
 
 <template>
   <div class="wrap">
-    <div>
-      <div class="cells-cont">
-        <div v-for="i in 27" class="cell">
-          <div v-for="j in 50" class="cell">
-            <Cell :col="i" :row="j" />
-          </div>
+    <div class="cells-cont">
+      <div v-for="i in 27" class="cell">
+        <div v-for="j in 50" class="cell">
+          <Cell :col="i" :row="j" />
         </div>
       </div>
     </div>
@@ -30,23 +28,32 @@ body {
 }
 
 .cell {
+  position: relative;
+  height: 30px;
+}
+
+.inp-wrap {
+  position: relative;
+  width: 120px;
   height: 30px;
   border: 1px solid black;
-  border-top: none;
-  border-left: none;
-  width: fit-content;
+  border-right: none;
 }
+
 .inp {
   border: none;
   font-size: 17px;
   border-radius: 0;
-  height: 28px;
-  width: 116px;
+  width: 100%;
+  height: 29px;
+  box-sizing: border-box;
 }
+
 .empty {
   height: 30px;
   width: 30px;
 }
+
 .top {
   border: none;
   height: 30px;
@@ -55,7 +62,11 @@ body {
   align-items: center;
   background: #cbcccb;
   width: 120px;
+  border: 1px solid black;
+  border-top: none;
+  border-right: none;
 }
+
 .left {
   height: 30px;
   width: 30px;
@@ -63,6 +74,9 @@ body {
   justify-content: center;
   align-items: center;
   background: #cbcccb;
+  border: 1px solid black;
+  border-left: none;
+  border-right: none;
 }
 
 .wrap {
