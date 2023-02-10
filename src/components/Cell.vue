@@ -8,8 +8,6 @@ export default {
   data() {
     return {
       inputVal: "",
-      done: false,
-      posx: 0
     };
   },
   methods: {
@@ -47,39 +45,61 @@ export default {
         element.focus()
       }
     },
-
-    borderColor(event) {
-      let element = cellsArr[this.col - 1][0]
-      // let prevElement = cellsArr[this.col - 2][0]  
-      // element.style.borderRight = '1px solid black'
-      // prevElement.style.borderRight = '1px solid black'
+    createChildDiv(height) {
+      let div = document.createElement('div')
+      div.style.top = 0
+      div.style.right = 0
+      div.style.width = '5px'
+      div.style.position = 'absolute'
+      div.style.cursor = 'col-resize'
+      div.style.height = height + 'px'
+      return div
     },
-    checking(event) {
-      let element = cellsArr[this.col - 1][0]
-      let prevElement = -1
-      if(this.col !== 1)
-        prevElement = cellsArr[this.col - 2][0]
-      this.posx = event.clientX - 31 - (121 * (this.col - 1))
-      // console.log(this.posx)
-      if (this.posx % 121 === 0)
-        element.style.borderLeft = '3px solid blue'
-      else 
-        element.style.borderLeft = '1px solid black'
-    },
+    setEventListners(div) {
+      let currCol, pageX, currColWidth
+      let colMap = this.col
 
-    resize(event) {
-      console.log(this.posx)
-      // for (let i = 0; i < 50; i++) {
-      //   let element = cellsArr[this.col - 1][i]
-      //   // if (i === 0)
-      //     element.style.width = '200px'
-      //   // else
-      //   //   element.style.width = '196px'
-      // }
+      div.addEventListener('mousedown', function (e) {
+        currCol = e.target.parentElement
+        pageX = e.pageX
+        currColWidth = currCol.offsetWidth
+      })
+      
+      div.addEventListener('mouseover', function (e) {
+        e.target.style.borderRight = '3px solid red'
+      })
+
+      div.addEventListener('mouseout', function (e) {
+        e.target.style.borderRight = ''
+      })
+
+      document.addEventListener('mouseup', function (e) {
+        currCol = undefined
+        pageX = undefined
+        currColWidth = undefined
+      })
+
+      div.addEventListener('mousemove', function (e) {
+        if (currCol) {
+          let diffX = e.pageX - pageX
+          currCol.style.width = currColWidth + diffX + 'px'
+          for(let i = 1; i < 50; i++) {
+            const element = cellsArr[colMap - 1][i]
+            element.style.width = currColWidth + diffX + 'px'
+          }
+        }
+      })
     }
   },
   mounted() {
-    cellsArr[this.col - 1][this.row - 1] = this.$refs.ipcell;
+    cellsArr[this.col - 1][this.row - 1] = this.$refs.ipcell
+    if (this.row - 1 === 0 && this.col - 1 !== 0) {
+      this.$refs.ipcell.position = 'relative'
+      let div = this.createChildDiv(this.$refs.ipcell.offsetHeight)
+      this.$refs.ipcell.appendChild(div)
+
+      this.setEventListners(div)
+    }
   },
 };
 </script>
@@ -89,8 +109,7 @@ export default {
     <input ref="ipcell" class="inp" v-model="inputVal" @keydown="handleKeyDown" />
   </div>
   <div v-else-if="row === 1 && col === 1" class="empty" ref="ipcell"></div>
-  <div v-else-if="row === 1 && col !== 1" ref="ipcell" class="top" @mousedown="resize" @mousemove="checking"
-    @mouseleave="borderColor">
+  <div v-else-if="row === 1 && col !== 1" ref="ipcell" class="top">
     {{ String.fromCharCode(col - 1 + 64) }}
   </div>
   <div v-else-if="col === 1 && row !== 1" ref="ipcell" class="left">
