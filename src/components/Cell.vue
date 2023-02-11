@@ -8,6 +8,12 @@ export default {
   data() {
     return {
       inputVal: "",
+      onBar: false,
+      currCol: null,
+      pageX: null,
+      currColWidth: null,
+      colMap: this.col,
+      pressed: false
     };
   },
   methods: {
@@ -45,60 +51,50 @@ export default {
         element.focus()
       }
     },
-    createChildDiv(height) {
-      let div = document.createElement('div')
-      div.style.top = 0
-      div.style.right = 0
-      div.style.width = '5px'
-      div.style.position = 'absolute'
-      div.style.cursor = 'col-resize'
-      div.style.height = height + 'px'
-      return div
+
+    mouseOver(e) {
+      this.onBar = true
     },
-    setEventListners(div) {
-      let currCol, pageX, currColWidth
-      let colMap = this.col
 
-      div.addEventListener('mousedown', function (e) {
-        currCol = e.target.parentElement
-        pageX = e.pageX
-        currColWidth = currCol.offsetWidth
-      })
-      
-      div.addEventListener('mouseover', function (e) {
-        e.target.style.borderRight = '3px solid red'
-      })
+    mouseOut(e) {
+      this.onBar = false
+    },
 
-      div.addEventListener('mouseout', function (e) {
-        e.target.style.borderRight = ''
-      })
+    mouseDown(e) {
+      this.currCol = e.target.parentElement
+      this.pageX = e.pageX
+      this.currColWidth = this.currCol.offsetWidth
+      this.pressed = true
+    },
 
-      document.addEventListener('mouseup', function (e) {
-        currCol = undefined
-        pageX = undefined
-        currColWidth = undefined
-      })
-
-      div.addEventListener('mousemove', function (e) {
-        if (currCol) {
-          let diffX = e.pageX - pageX
-          currCol.style.width = currColWidth + diffX + 'px'
-          for(let i = 1; i < 50; i++) {
-            const element = cellsArr[colMap - 1][i]
-            element.style.width = currColWidth + diffX + 'px'
+    mouseMove(e) {
+      if (this.currCol !== null && this.pressed) {
+        let diffX = e.pageX - this.pageX
+        if(diffX > 0) {
+          this.currCol.style.width = this.currColWidth + diffX + 'px'
+          for (let i = 1; i < 50; i++) {
+            const element = cellsArr[this.colMap - 1][i]
+            element.style.width = this.currColWidth + diffX + 'px'
           }
         }
-      })
-    }
+      }
+    },
+
+    mouseUp(e) {
+      this.currCol = null
+      this.pageX = null
+      this.currColWidth = null
+      this.pressed = false
+    },
   },
   mounted() {
     cellsArr[this.col - 1][this.row - 1] = this.$refs.ipcell
     if (this.row - 1 === 0 && this.col - 1 !== 0) {
-      this.$refs.ipcell.position = 'relative'
-      let div = this.createChildDiv(this.$refs.ipcell.offsetHeight)
-      this.$refs.ipcell.appendChild(div)
-
-      this.setEventListners(div)
+      this.$refs.rez.addEventListener('mouseover', this.mouseOver)
+      this.$refs.rez.addEventListener('mouseout', this.mouseOut)
+      this.$refs.rez.addEventListener('mousedown', this.mouseDown)
+      document.addEventListener('mousemove', this.mouseMove)
+      document.addEventListener('mouseup', this.mouseUp)
     }
   },
 };
@@ -111,8 +107,24 @@ export default {
   <div v-else-if="row === 1 && col === 1" class="empty" ref="ipcell"></div>
   <div v-else-if="row === 1 && col !== 1" ref="ipcell" class="top">
     {{ String.fromCharCode(col - 1 + 64) }}
+    <div ref="rez" :class="{ active: onBar }" class="rez-bar"></div>
   </div>
   <div v-else-if="col === 1 && row !== 1" ref="ipcell" class="left">
     {{ row - 1 }}
   </div>
 </template>
+
+<style>
+.rez-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  cursor: col-resize;
+  width: 5px;
+}
+
+.active {
+  border-right: 3px solid rgb(57, 131, 235);
+}
+</style>

@@ -1,9 +1,11 @@
 <script setup>
 import Cell from "./components/Cell.vue";
+import TopView from "./components/TopView.vue";
 </script>
 
 <template>
   <div class="wrap">
+    <TopView />
     <div class="cells-cont">
       <div v-for="i in 27" class="cell">
         <div v-for="j in 50" class="cell">
@@ -55,6 +57,7 @@ body {
 }
 
 .top {
+  position: relative;
   border: none;
   height: 30px;
   display: flex;
@@ -81,5 +84,6 @@ body {
 
 .wrap {
   display: flex;
+  flex-direction: column;
 }
 </style>
