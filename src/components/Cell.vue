@@ -1,5 +1,6 @@
 <script>
-import { cellsArr } from "../state";
+import { cellsArr } from "../state"
+import { store } from '../store'
 export default {
   props: {
     col: Number,
@@ -7,15 +8,20 @@ export default {
   },
   data() {
     return {
+      store,
       inputVal: "",
+      focused: false,
       onBar: false,
       currCol: null,
       pageX: null,
       currColWidth: null,
       colMap: this.col,
-      pressed: false
+      pressed: false,
+      minWidth: 121,
+      color: store.selectedColor
     };
   },
+  
   methods: {
     handleKeyDown(event) {
       let r = -1,
@@ -70,7 +76,7 @@ export default {
     mouseMove(e) {
       if (this.currCol !== null && this.pressed) {
         let diffX = e.pageX - this.pageX
-        if(diffX > 0) {
+        if(this.currColWidth >= this.minWidth && diffX > 0) {
           this.currCol.style.width = this.currColWidth + diffX + 'px'
           for (let i = 1; i < 50; i++) {
             const element = cellsArr[this.colMap - 1][i]
@@ -86,6 +92,15 @@ export default {
       this.currColWidth = null
       this.pressed = false
     },
+
+    onFocus(e) {
+      this.focused = true
+      this.$refs.sipcell.style.color = store.selectedColor
+    },
+
+    onBlur(e)  {
+      this.focused = false
+    }
   },
   mounted() {
     cellsArr[this.col - 1][this.row - 1] = this.$refs.ipcell
@@ -95,6 +110,9 @@ export default {
       this.$refs.rez.addEventListener('mousedown', this.mouseDown)
       document.addEventListener('mousemove', this.mouseMove)
       document.addEventListener('mouseup', this.mouseUp)
+    } else if(this.col - 1 !== 0) {
+      this.$refs.sipcell.addEventListener("focus", this.onFocus)
+      this.$refs.sipcell.addEventListener("blur", this.onBlur);
     }
   },
 };
@@ -102,7 +120,7 @@ export default {
 
 <template>
   <div v-if="row !== 1 && col !== 1" class="inp-wrap" ref="ipcell">
-    <input ref="ipcell" class="inp" v-model="inputVal" @keydown="handleKeyDown" />
+    <input ref="sipcell" class="inp" v-model="inputVal" @keydown="handleKeyDown" />
   </div>
   <div v-else-if="row === 1 && col === 1" class="empty" ref="ipcell"></div>
   <div v-else-if="row === 1 && col !== 1" ref="ipcell" class="top">

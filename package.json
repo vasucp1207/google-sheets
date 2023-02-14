@@ -8,8 +8,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@caohenghu/vue-colorpicker": "^1.2.4",
     "prettier": "^2.8.4",
-    "vue": "^3.2.45"
+    "vue": "^3.2.45",
+    "vue-pick-colors": "^1.3.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
