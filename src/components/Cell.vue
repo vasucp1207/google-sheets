@@ -12,16 +12,22 @@ export default {
       inputVal: "",
       focused: false,
       onBar: false,
+      onRowBar: false,
       currCol: null,
+      currRow: null,
       pageX: null,
+      pageY: null,
       currColWidth: null,
+      currRowHeight: null,
       colMap: this.col,
+      rowMap: this.row,
       pressed: false,
       minWidth: 121,
+      minHeight: 30,
       color: store.selectedColor
     };
   },
-  
+
   methods: {
     handleKeyDown(event) {
       let r = -1,
@@ -40,48 +46,64 @@ export default {
         const element = cellsArr[r][c].firstChild
         element.focus()
       } else if (event.keyCode === 39 && this.inputVal === "") {
-        if (c <= 50) r++;
+        if (c < 26) r++;
         const element = cellsArr[r][c].firstChild
         element.focus()
       } else if (event.keyCode === 37 && this.inputVal === "") {
-        if (r > 0) r--;
+        if (r > 1) r--;
         const element = cellsArr[r][c].firstChild
         element.focus()
       } else if (event.keyCode === 40 && this.inputVal === "") {
-        if (c < 50) c++;
+        if (c < 49) c++;
         const element = cellsArr[r][c].firstChild
         element.focus()
       } else if (event.keyCode === 38 && this.inputVal === "") {
-        if (c > 0) c--;
+        if (c > 1) c--;
         const element = cellsArr[r][c].firstChild
         element.focus()
       }
     },
 
     mouseOver(e) {
-      this.onBar = true
+      if (this.rowMap - 1 == 0) this.onBar = true
+      else this.onRowBar = true
     },
 
     mouseOut(e) {
       this.onBar = false
+      this.onRowBar = false
     },
 
     mouseDown(e) {
-      this.currCol = e.target.parentElement
-      this.pageX = e.pageX
-      this.currColWidth = this.currCol.offsetWidth
-      this.pressed = true
+      if (this.onBar) {
+        this.currCol = e.target.parentElement
+        this.pageX = e.pageX
+        this.currColWidth = this.currCol.offsetWidth
+        this.pressed = true
+      }
+      if (this.onRowBar) {
+        this.pageY = e.pageY
+        this.currRow = e.target.parentElement
+        this.currRowHeight = this.currRow.offsetHeight
+        this.pressed = true
+      }
     },
 
     mouseMove(e) {
       if (this.currCol !== null && this.pressed) {
         let diffX = e.pageX - this.pageX
-        if(this.currColWidth >= this.minWidth && diffX > 0) {
-          this.currCol.style.width = this.currColWidth + diffX + 'px'
-          for (let i = 1; i < 50; i++) {
-            const element = cellsArr[this.colMap - 1][i]
-            element.style.width = this.currColWidth + diffX + 'px'
-          }
+        this.currCol.style.width = this.currColWidth + diffX + 'px'
+        for (let i = 1; i < 50; i++) {
+          const element = cellsArr[this.colMap - 1][i]
+          element.style.width = this.currColWidth + diffX + 'px'
+        }
+      }
+
+      else if (this.currRow !== null && this.pressed) {
+        let diffY = e.pageY - this.pageY
+        for (let i = 0; i <= 26; i++) {
+          const element = cellsArr[i][this.rowMap - 1]
+          element.style.height = this.currRowHeight + diffY + 'px'
         }
       }
     },
@@ -89,28 +111,41 @@ export default {
     mouseUp(e) {
       this.currCol = null
       this.pageX = null
+      this.pageY = null
       this.currColWidth = null
       this.pressed = false
+      this.currRow = null
+      this.currRowHeight = null
     },
 
     onFocus(e) {
       this.focused = true
       this.$refs.sipcell.style.color = store.selectedColor
+      if (store.selectedBackground !== '#FFFFFFFF')
+        this.$refs.sipcell.style.background = store.selectedBackground
     },
 
-    onBlur(e)  {
+    onBlur(e) {
       this.focused = false
+      store.selectedBackground = '#FFFFFFFF'
     }
   },
   mounted() {
     cellsArr[this.col - 1][this.row - 1] = this.$refs.ipcell
+    if (this.row - 1 !== 0 && this.col - 1 === 0) {
+      this.$refs.rez2.addEventListener('mouseover', this.mouseOver)
+      this.$refs.rez2.addEventListener('mouseout', this.mouseOut)
+      this.$refs.rez2.addEventListener('mousedown', this.mouseDown)
+      document.addEventListener('mousemove', this.mouseMove)
+      document.addEventListener('mouseup', this.mouseUp)
+    }
     if (this.row - 1 === 0 && this.col - 1 !== 0) {
       this.$refs.rez.addEventListener('mouseover', this.mouseOver)
       this.$refs.rez.addEventListener('mouseout', this.mouseOut)
       this.$refs.rez.addEventListener('mousedown', this.mouseDown)
       document.addEventListener('mousemove', this.mouseMove)
       document.addEventListener('mouseup', this.mouseUp)
-    } else if(this.col - 1 !== 0) {
+    } else if (this.col - 1 !== 0 && this.row - 1 !== 0) {
       this.$refs.sipcell.addEventListener("focus", this.onFocus)
       this.$refs.sipcell.addEventListener("blur", this.onBlur);
     }
@@ -122,14 +157,19 @@ export default {
   <div v-if="row !== 1 && col !== 1" class="inp-wrap" ref="ipcell">
     <input ref="sipcell" class="inp" v-model="inputVal" @keydown="handleKeyDown" />
   </div>
+
   <div v-else-if="row === 1 && col === 1" class="empty" ref="ipcell"></div>
+
   <div v-else-if="row === 1 && col !== 1" ref="ipcell" class="top">
     {{ String.fromCharCode(col - 1 + 64) }}
     <div ref="rez" :class="{ active: onBar }" class="rez-bar"></div>
   </div>
+
   <div v-else-if="col === 1 && row !== 1" ref="ipcell" class="left">
     {{ row - 1 }}
+    <div ref="rez2" :class="{ active2: onRowBar }" class="rez2-bar"></div>
   </div>
+
 </template>
 
 <style>
@@ -142,7 +182,19 @@ export default {
   width: 5px;
 }
 
+.rez2-bar {
+  position: absolute;
+  bottom: 0;
+  height: 5px;
+  cursor: row-resize;
+  width: 100%;
+}
+
 .active {
   border-right: 3px solid rgb(57, 131, 235);
+}
+
+.active2 {
+  border-bottom: 4px solid rgb(57, 131, 235);
 }
 </style>
