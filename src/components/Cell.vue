@@ -123,11 +123,14 @@ export default {
       this.$refs.sipcell.style.color = store.selectedColor
       if (store.selectedBackground !== '#FFFFFFFF')
         this.$refs.sipcell.style.background = store.selectedBackground
+      if (store.fontSize !== 16 && this.$refs.sipcell.offsetHeight > 2 * store.fontSize)
+        this.$refs.sipcell.style.fontSize = store.fontSize + 'px'
     },
 
     onBlur(e) {
       this.focused = false
       store.selectedBackground = '#FFFFFFFF'
+      store.fontSize = 16
     }
   },
   mounted() {
@@ -147,7 +150,7 @@ export default {
       document.addEventListener('mouseup', this.mouseUp)
     } else if (this.col - 1 !== 0 && this.row - 1 !== 0) {
       this.$refs.sipcell.addEventListener("focus", this.onFocus)
-      this.$refs.sipcell.addEventListener("blur", this.onBlur);
+      this.$refs.sipcell.addEventListener("blur", this.onBlur)
     }
   },
 };

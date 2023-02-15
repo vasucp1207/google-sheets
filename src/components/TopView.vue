@@ -35,7 +35,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <div class="picker-cont">
     <span class="picker">{{ this.title }}<pick-colors class="color" v-model:value="value" show-alpha
         @change="onColorChange" /></span>
   </div>
@@ -44,7 +44,6 @@ export default defineComponent({
 
 <style>
 .picker {
-  margin-left: 50px;
   position: relative;
   font-size: 20px;
 }
